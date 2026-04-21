@@ -1,0 +1,18 @@
+{
+    "app_name": "IntelliBusiness Suite",
+    "company_name": "Daniel Sánchez Daneri",
+    "contact_email": "sanchezdaneri@gmail.com",
+    "db_type": "sqlite",
+    "report_schedule": "08:00",
+    "default_report_type": "ventas",
+    "report_format": "pdf",
+    "ai_settings": {
+        "forecast_days": 30,
+        "safety_stock_margin": 0.2
+    },
+    "report_settings": {
+        "default_days": 30,
+        "sheet_name": "Reporte Empresarial",
+        "included_columns": ["product_name", "quantity", "amount", "date"]
+    }
+}

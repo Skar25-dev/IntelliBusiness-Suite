@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pkl
+*.db
+.env
+reports/*.xlsx
+reports/*.pdf
+data/*.csv
+.vscode/
