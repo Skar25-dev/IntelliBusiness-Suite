@@ -1,0 +1,72 @@
+:root {
+    --deep-navy: #141b41;
+    --corporate-blue: #306bac;
+    --bright-blue: #6f9ceb;
+    --soft-blue: #98b9f2;
+    --tech-violet: #918ef4;
+    --bg-body: #f0f2f5;
+    --white: #ffffff;
+    --main-gradient: linear-gradient(135deg, var(--corporate-blue) 0%, var(--deep-navy) 100%);
+    --tech-gradient: linear-gradient(135deg, var(--corporate-blue) 0%, var(--tech-violet) 100%)
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--deep-navy);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.navbar {
+    background-color: var(--deep-navy) !important;
+    border-bottom: 3px solid;
+    border-image-source: var(--tech-gradient);
+    border-image-slice: 1;
+}
+
+.nav-link { 
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-link.active {
+    color: var(--tech-violet) !important;
+    font-weight: 700;
+}
+
+.hero {
+    background: var(--main-gradient);
+    color: var(--white);
+    padding: 2.5rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.cards {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(20, 27, 65, 0.05);
+}
+
+.card-header {
+    background-color: var(--white);
+    font-weight: 700;
+    color: var(--corporate-blue);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1.2rem !important;
+}
+
+.btn-tech {
+    background: var(--tech-gradient);
+    border: none;
+    color: var(--white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.btn-tech:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(145, 142, 244, 0.4);
+    color: var(--white);
+}
