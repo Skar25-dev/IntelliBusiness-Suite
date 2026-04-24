@@ -1,14 +1,14 @@
 import pandas as pd
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from app.models import Sale, Inventory
+from app.models import Sale, Product
 from app.utils.excel_generator import generate_excel_report
 from app.utils.pdf_generator import generate_pdf_report
 from app.config import settings
 
 REPORT_MODELS = {
     "ventas": Sale,
-    "inventario": Inventory
+    "inventario": Product
 }
 
 def get_columns_for_model(report_type: str):
@@ -39,7 +39,6 @@ class ReportService:
         
         if days:
             date_limit = datetime.now() - timedelta(days=days)
-
             if hasattr(model, 'date'):
                 query = query.filter(model.date >= date_limit)
             elif hasattr(model, 'last_restock_date'):
@@ -60,7 +59,6 @@ class ReportService:
                 df[col] = pd.to_datetime(df[col]).dt.strftime('%Y-%m-%d %H:%M')
         
         report_name = f"Reporte_{report_type}"
-
         formato = getattr(settings, "report_format", "xlsx").lower()
 
         if formato == "pdf":

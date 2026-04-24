@@ -1,6 +1,7 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from app.config import settings
 from email_validator import validate_email, EmailNotValidError
+from pathlib import Path
 
 class EmailService:
     def __init__(self):
