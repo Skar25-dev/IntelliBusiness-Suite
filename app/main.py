@@ -35,13 +35,21 @@ async def home(request: Request, db: Session = Depends(get_db)):
 @app.get("/reports", response_class=HTMLResponse)
 async def reports_page(request: Request, db: Session = Depends(get_db)):
     REPORTS_DIR = BASE_DIR / "reports"
-    files = sorted(os.listdir(REPORTS_DIR), reverse=True) if REPORTS_DIR.exists() else []
+    
+    if REPORTS_DIR.exists():
+        files = [f for f in os.listdir(REPORTS_DIR) if f.endswith(('.xlsx', '.pdf'))]
+
+        report_files = sorted(
+            files,
+            key=lambda x: os.path.getmtime(REPORTS_DIR / x),
+            reverse=True
+        )
     
     return templates.TemplateResponse(
         request=request, 
         name="reports.html", 
         context={
-            "reports": files, 
+            "reports": report_files, 
             "app_name": settings.app_name,
             "settings": settings
         }
@@ -120,3 +128,25 @@ async def update_settings(
             window.location.href = '/settings';
         </script>
     """)
+
+@app.post("/run-report")
+async def run_report_manual():
+    from app.services.scheduler_service import scheduled_report_job
+    try:
+        await scheduled_report_job()
+        return {"status": "success", "message": "Reporte e IA procesados con éxito"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/download/{filename}")
+async def download_report(filename: str):
+    REPORTS_DIR = BASE_DIR / "reports"
+    file_path = REPORTS_DIR / filename
+
+    if file_path.exists():
+        return FileResponse(
+            path=str(file_path),
+            filename=filename,
+            media_type='application/octet-stream'
+        )
+    raise HTTPException(status_code=404, detail="Archivo no encontrado")    

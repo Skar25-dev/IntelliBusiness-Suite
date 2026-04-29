@@ -10,10 +10,10 @@
 </head>
 <body>
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
-        <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="liveToast" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="toastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -30,84 +30,48 @@
         </div>
     </nav>
 
-    <header class="hero-section shadow-sm">
-        <div class="container text-center">
-            <h1 class="display-5 fw-bold mb-2">{{ app_name }}</h1>
-            <p class="lead opacity-75 fw-light">Automatización inteligente de reportes empresariales</p>
-        </div>
-    </header>
-
-    <main class="container-fluid px-md-5">
-        <div class="row g-4 g-lg-5">
-
+    <div class="container mt-5">
+        <div class="row g-4">
+            <!-- Acción Manual -->
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-header border-0 bg-transparent pt-4 px-4">
-                        <i class="bi bi-rocket-takeoff text-primary me-2"></i> Ejecución Manual
-                    </div>
-                    <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
-                        <p class="text-muted small">Genera y envía el reporte configurado por defecto a la bandeja de entrada de forma inmediata.</p>
-                        <div>
-                            <button onclick="runReport()" id="btnRun" class="btn btn-primary btn-lg w-100 py-3 shadow-sm transition-all">
-                                <i class="bi bi-send-fill me-2"></i> Enviar Reporte Ahora
-                            </button>
-                            <div id="statusMsg" class="mt-3" style="min-height: 25px;"></div>
-                        </div>
-                    </div>
+                <div class="card h-100 p-4 border-0 shadow-sm">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-rocket-takeoff text-primary me-2"></i>Ejecución Manual</h5>
+                    <p class="text-muted small">Genera el reporte configurado y activa el análisis de IA de stock inmediatamente.</p>
+                    <button id="btnRun" onclick="runReport()" class="btn btn-tech w-100 py-3 mt-auto">
+                        <i class="bi bi-send-fill me-2"></i> Generar y Enviar
+                    </button>
                 </div>
             </div>
-            
+
+            <!-- Historial -->
             <div class="col-md-8">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-header border-0 bg-transparent pt-4 px-4 d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-folder2-open text-primary me-2"></i> Historial de Reportes</span>
-                        <span class="badge bg-primary rounded-pill px-3 py-2">{{ reports|length }} archivos</span>
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-transparent pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">📂 HISTORIAL DE REPORTES</span>
+                        <span class="badge bg-primary rounded-pill px-3">{{ reports|length }} archivos</span>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light sticky-top">
                                     <tr>
-                                        <th class="ps-4 py-3">Nombre del Archivo</th>
-                                        <th class="text-end pe-4 py-3">Acciones</th>
+                                        <th class="ps-4">Archivo</th>
+                                        <th class="text-end pe-4">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for report in reports %}
                                     <tr>
                                         <td class="ps-4">
-                                            <div class="d-flex align-items-center">
-                                                {% if report.endswith('.pdf') %}
-                                                    <div class="file-icon file-icon-pdf me-3">
-                                                        <i class="bi bi-file-earmark-pdf-fill"></i>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="file-icon file-icon-excel me-3">
-                                                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                                                    </div>
-                                                {% endif %}
-                                                
-                                                <div class="d-flex flex-column">
-                                                    <span class="report-name fw-medium text-dark">{{ report }}</span>
-                                                    <small class="text-muted" style="font-size: 0.7rem;">
-                                                        {{ "Documento PDF" if report.endswith('.pdf') else "Hoja de Cálculo Excel" }}
-                                                    </small>
-                                                </div>
-                                            </div>
+                                            {% if report.endswith('.pdf') %}
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4 me-2"></i>
+                                            {% else %}
+                                                <i class="bi bi-file-earmark-spreadsheet-fill text-success fs-4 me-2"></i>
+                                            {% endif %}
+                                            <span class="fw-medium">{{ report }}</span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <a href="/download/{{ report }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
-                                                <i class="bi bi-download me-1"></i> Bajar
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="2" class="text-center py-5">
-                                            <div class="py-4">
-                                                <i class="bi bi-cloud-slash display-4 text-light"></i>
-                                                <p class="text-muted mt-3 italic">No hay reportes disponibles en la carpeta /reports</p>
-                                            </div>
+                                            <a href="/download/{{ report }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Bajar</a>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -118,46 +82,38 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="container text-center mt-5 mb-4 py-4 border-top">
-        <p class="text-muted small">&copy; 2026 {{ settings.company_name }} | Automatización BPAR</p>
-    </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         async function runReport() {
-            const btn = document.getElementById('btnRun');
-            const toastEl = document.getElementById('liveToast');
-            const toastMsg = document.getElementById('toastMessage');
-            const toast = new bootstrap.Toast(toastEl);
+            const btn = document.getElementById('btnRun')
+            const toastEl = document.getElementById('liveToast')
+            const toastMsg = document.getElementById('toastMessage')
+            const toast = new bootstrap.Toast(toastEl)
 
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.disabled = true
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...'
 
             try {
-                const response = await fetch('/run-report', { method: 'POST' });
-                const data = await response.json
-
+                const response = await fetch('/run-report', { method: 'POST' })
                 if (response.ok) {
-                    toastEl.className = "toast align-items-center border-0 shadow-lg toast-tech-success";
-                    toastMsg.innerHTML = '<i class="bi bi-check-all me-2"></i> ¡Petición procesada! El servidor ha aceptado el envío del reporte.';
-                    toast.show();
-                    setTimeout(() => { location.reload(); }, 2000);
-                } else {
-                    toastEl.className = "toast align-items-center border-0 shadow-lg toast-tech-error"
-                    toastMsg.innerHTML = `<i class="bi bi-exclamattion-triangle-fill me-2></i> ${data.detail}`
+                    toastEl.className = "toast align-items-center border-0 shadow-lg toast-tech-success"
+                    toastMsg.innerHTML = '✅ ¡Éxito! Reporte y alertas de IA enviados al email.'
                     toast.show()
+                    setTimeout(() => { location.reload() }, 3000)
+                } else {
+                    throw new Error()
                 }
             } catch (error) {
-                toastEl.className = "toast align-items-center border-0 shadow-lg toast-tech-error";
-                toastMsg.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i> Fallo en el envío. Revisa la configuración.';
-                toast.show();
+                toastEl.className = "toast align-items-center border-o shadow-lg toast-tech-error"
+                toastMsg.innerHTML = '❌ Error en el motor de la Suite.'
+                toast.show()
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-send-fill me-2"></i> Enviar Reporte Ahora';
+                btn.disabled = false
+                btn.innerHTML = '<i class="bi bi-send-fill me-2"></i> Generar y Enviar'
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,18 +1,25 @@
 {
     "app_name": "IntelliBusiness Suite",
-    "company_name": "Daniel Sánchez Daneri",
-    "contact_email": "sanchezdaneri@gmail.com",
-    "db_type": "sqlite",
+    "company_name": "Daniel S\u00e1nchez Daneri",
+    "contact_email": "sanchezdaneri.tnf@gmail.com",
     "report_schedule": "08:00",
-    "default_report_type": "ventas",
-    "report_format": "pdf",
+    "db_type": "sqlite",
+    "default_report_type": "inventario",
+    "report_format": "xlsx",
     "ai_settings": {
         "forecast_days": 30,
         "safety_stock_margin": 0.2
     },
     "report_settings": {
         "default_days": 30,
-        "sheet_name": "Reporte Empresarial",
-        "included_columns": ["product_name", "quantity", "amount", "date"]
+        "sheet_name": "Reporte Inventario",
+        "included_columns": [
+            "name",
+            "category",
+            "current_stock",
+            "min_stock_level",
+            "price",
+            "unit_cost"
+        ]
     }
 }
