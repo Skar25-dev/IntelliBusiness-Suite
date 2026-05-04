@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from app.models import Product, DailySale
+from app.models import Product, Sale
 from pathlib import Path
 
 MODEL_PATH = Path(__file__).resolve().parent / "model_store" / "stock_model.pkl"
@@ -11,15 +11,18 @@ model = joblib.load(MODEL_PATH)
 
 def predict_sales_range(db: Session, product_name: str, days_to_forecast: int = 30):
     product = db.query(Product).filter(Product.name == product_name).first()
-    
-    last_sales = db.query(DailySale).filter(DailySale.product_id == product.id)\
-                   .order_by(DailySale.date.desc()).limit(7).all()
+    if not product:
+        return None
+
+    last_sales = db.query(Sale).filter(Sale.product_id == product.id)\
+                   .order_by(Sale.date.desc()).limit(7).all()
 
     if len(last_sales) < 7:
         return None
 
     current_window = [s.quantity for s in reversed(last_sales)]
     predictions = []
+    
     future_date = datetime.now() + timedelta(days=1)
 
     for _ in range(days_to_forecast):
