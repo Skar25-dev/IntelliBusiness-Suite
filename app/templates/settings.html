@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración - {{ app_name }}</title>
+    <title>Ajustes - {{ app_name }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
 </head>
@@ -20,158 +20,135 @@
         </div>
     </nav>
 
-    <div class="container-fluid px-md-5">
-        <div class="row justify-content-center g-lg-5">
-            <div class="col-md-8 mb-5">
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h2 class="mb-4 fw-bold tech-title">Panel de control global</h2>
                 
-                <h2 class="mb-4 fw-bold tech-title">Configuración del Sistema</h2>
-                
-                <div class="card shadow">
-                    <div class="card-header">
-                        ⚙️ AJUSTES GENERALES
-                    </div>
-                    
-                    <div class="card-body p-4">
-                        <form action="/settings" method="post">
-                            
+                <form action="/settings" method="post">
+                    <!-- Sección 1: Identidad y comunicación -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">⚙️ Identidad y Automatización</div>
+                        <div class="card-body p-4">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nombre de la Aplicación</label>
+                                    <label class="form-label">Nombre de la aplicación</label>
                                     <input type="text" name="app_name" class="form-control" value="{{ settings.app_name }}" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Nombre de la Empresa</label>
+                                    <label class="form-label">Nombre de la empresa</label>
                                     <input type="text" name="company_name" class="form-control" value="{{ settings.company_name }}" required>
                                 </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Email de Destino (Reportes)</label>
-                                <input type="email" name="contact_email" class="form-control" value="{{ settings.contact_email }}" required>
-                                <div class="form-text">Dirección donde se enviarán los archivos Excel generados automáticamente.</div>
-                            </div>
-
-                            <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Motor de Base de Datos</label>
-                                    <select name="db_type" class="form-select">
-                                        <option value="sqlite" {% if settings.db_type == 'sqlite' %}selected{% endif %}>SQLite (Local)</option>
-                                        <option value="postgresql" {% if settings.db_type == 'postgresql' %}selected{% endif %}>PostgreSQL (Producción)</option>
-                                    </select>
+                                    <label class="form-label">Email de destino</label>
+                                    <input type="email" name="contact_email" class="form-control" value="{{ settings.contact_email }}" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tipo de Reporte por Defecto</label>
-                                    <select name="default_report_type" class="form-select">
-                                        {% for type in report_types %}
-                                            <option value="{{ type }}" {% if settings.default_report_type == type %}selected{% endif %}>
-                                                {{ type.capitalize() }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Columnas a incluir en el reporte</label>
-                                    <!-- Guardamos los datos aquí de forma segura para JS -->
-                                    <div id="checkbox-container" 
-                                         class="p-3 border rounded bg-light shadow-sm"
-                                         data-all-columns='{{ all_columns | tojson | safe }}'
-                                         data-selected='{{ settings.report_settings.included_columns | tojson | safe }}'>
-                                         <!-- Se llena con JS -->
-                                    </div>
-                                    <div class="form-text mt-2">Selecciona al menos una columna para que el reporte no esté vacío.</div>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-                            <h5 class="text-secondary mb-3">📊 Configuración del Archivo</h5>
-
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Hora Diaria</label>
+                                    <label class="form-label">Hora del reporte diario</label>
                                     <input type="time" name="report_schedule" class="form-control" value="{{ settings.report_schedule }}" required>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Días a incluir</label>
-                                    <input type="number" name="default_days" class="form-control" value="{{ settings.report_settings.default_days }}" required>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Formato del Archivo</label>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Formato del reporte</label>
                                     <select name="report_format" id="report_format" class="form-select">
                                         <option value="xlsx" {% if settings.report_format == 'xlsx' %}selected{% endif %}>Excel (.xlsx)</option>
                                         <option value="pdf" {% if settings.report_format == 'pdf' %}selected{% endif %}>PDF (.pdf)</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <div class="col-md-4 mb-3" id="sheet_name_container">
-                                    <label class="form-label">Nombre Hoja</label>
+                    <!-- Sección 2: Inteligencia Artificial -->
+                     <div class="card shadow-sm mb-4">
+                        <div class="card-header">🧠 Configuración de la IA</div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Margen de seguridad del stock</label>
+                                    <input type="number" step="0.01" name="safety_stock_margin" class="form-control" value="{{ settings.ai_settings.safety_stock_margin }}" required>
+                                    <div class="form_text">Ej: 0.20 para un 20% de stock extra de seguridad.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Días de historial para reporte</label>
+                                    <input type="number" name="default_days" class="form-control" value="{{ settings.report_settings.default_days }}" required>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+
+                     <!-- Sección 3: Origen de los datos y columnas -->
+                      <div class="card shadow-sm mb-4">
+                        <div class="card-header">📊 Datos y Columnas</div>
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tabla de reporte por defecto</label>
+                                    <select name="default_report_type" class="form-select">
+                                        {% for type in report_types %}
+                                        <option value="{{ type }}" {% if settings.default_report_type == type %}selected{% endif %}>{{ type|capitalize }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3" id="sheet_name_container">
+                                    <label class="form-label">Nombre de la hoja (Excel)</label>
                                     <input type="text" name="sheet_name" class="form-control" value="{{ settings.report_settings.sheet_name }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Motor de la base de datos</label>
+                                    <select name="db_type" class="form-select">
+                                        <option value="sqlite" {% if settings.db_type == 'sqlite' %}selected{% endif %}>SQLite (Local)</option>
+                                        <option value="postgresql" {% if settings.db_type == 'postgresql' %}selected{% endif %}>Postgres (Producción)</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- Pasamos los datos de python a JS -->
-                            <script>
-                                function toggleSheetName() {
-                                    const formatSelector = document.getElementById('report_format');
-                                    const sheetContainer = document.getElementById('sheet_name_container');
-                                    const sheetInput = sheetContainer.querySelector('input');
-                            
-                                    if (formatSelector.value === 'pdf') {
-                                        sheetContainer.classList.add('d-none');
-                                        sheetInput.required = false;
-                                    } else {
-                                        sheetContainer.classList.remove('d-none');
-                                        sheetInput.required = true;
-                                    }
-                                }
-                            
-                                function updateCheckboxes() {
-                                    const container = document.getElementById('checkbox-container');
-                                    if (!container) return;
-                            
-                                    const allColumns = JSON.parse(container.dataset.allColumns || '{}');
-                                    const currentlySelected = JSON.parse(container.dataset.selected || '[]');
-                                    const reportType = document.querySelector('select[name="default_report_type"]').value;
-                                    const columns = allColumns[reportType] || [];
-                                    
-                                    container.innerHTML = ''; 
-                            
-                                    columns.forEach(col => {
-                                        const isChecked = currentlySelected.includes(col) ? 'checked' : '';
-                                        container.innerHTML += `
-                                            <div class="form-check form-check-inline me-3 mb-2">
-                                                <input class="form-check-input" type="checkbox" name="included_columns" 
-                                                       value="${col}" id="col_${col}" ${isChecked}>
-                                                <label class="form-check-label text-capitalize" for="col_${col}">
-                                                    ${col.replace('_', ' ')}
-                                                </label>
-                                            </div>
-                                        `;
-                                    });
-                                }
-                            
-                                document.getElementById('report_format').addEventListener('change', toggleSheetName);
-                                document.querySelector('select[name="default_report_type"]').addEventListener('change', updateCheckboxes);
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    toggleSheetName();
-                                    updateCheckboxes();
-                                });
-                            </script>
-
-                            <div class="alert-tech mt-4 mb-3 shadow-sm">
-                                <span>💡</span> Al guardar, el servidor se reiniciará automáticamente para aplicar la nueva configuración y reprogramar el robot.
+                            <label class="form-label d-block">Columnas a incluir</label>
+                            <div id="checkbox-container" class="p-3 border rounded bg-light"
+                                data-all-columns='{{ all_columns | tojson | safe }}'
+                                data-selected='{{ settings.report_settings.included_columns | tojson | safe }}'>
                             </div>
-    
-                            <hr class="my-4">
-                            
-                            <button type="submit" class="btn-save-tech w-100 btn-lg shadow-sm">
-                                💾 Guardar y Aplicar Cambios
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                        </div>
+                      </div>
+                      <div class="alert-texh mb-4">
+                        <span>💡</span> Los cambios guardados se aplicarán al instante tras el reinicio automático del motor.
+                      </div>
+
+                      <button type="submit" class="btn-save-tech w-100 btn-lg shadow">
+                        <i class="bi bi-cloud-check-fill me-2"></i>Guardar configuración de la suite
+                      </button>
+                </form>
             </div>
         </div>
     </div>
+
+    <!-- JS para la lógica condicional y los checkboxes -->
+    <script>
+        function toogleSheetName() {
+            const format = document.getElementById('report_format').value
+            const container = document.getElementById('sheet_name_container')
+            container.style.display = (format === 'pdf') ? 'none' : 'block'
+        }
+
+        function updateCheckboxes() {
+            const container = document.getElementById('checkbox-container')
+            const allColumns = JSON.parse(container.dataset.allColumns)
+            const selected = JSON.parse(container.dataset.selected)
+            const type = document.querySelector('select[name="default_report_type"]').value
+
+            container.innerHTML = '';
+            (allColumns[type] || []).forEach(col => {
+                const checked = selected.includes(col) ? 'checked' : ''
+                container.innerHTML += `
+                    <div class="form-check form-check-inline me-3">
+                        <input class="form-check-input" type="checkbox" name="included_columns" value="${col}" id="c_${col}" ${checked}>
+                        <label class="form-check-label text-capitalize" for="c_${col}">${col.replace('_', ' ')}</label>
+                    </div>`
+            })
+        }
+
+        document.getElementById('report_format').addEventListener('change', toogleSheetName)
+        document.querySelector('select[name="default_report_type"]').addEventListener('change', updateCheckboxes)
+        window.onload = () => { toogleSheetName(); updateCheckboxes(); }
+    </script>
 </body>
 </html>

@@ -1,22 +1,32 @@
 import os
 import json
 from typing import List
+from pathlib import Path
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from pathlib import Path
 
 from app.database import SessionLocal, engine
 from app.config import settings
 from app.models import Product, Sale
+from app.services.scheduler_service import start_scheduler
 from app.services.report_service import ReportService, REPORT_MODELS, get_columns_for_model
 from app.services.email_service import EmailService
 from app.services.ai_service import AIService
 from app.ai.predictor import predict_sales_range
 
-app = FastAPI(title=settings.app_name)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = start_scheduler()
+    print("⏰ MOTOR DEL SCHEDULER: Encendido y esperando...")
+    yield
+    scheduler.shutdown()
+    print("🛑 MOTOR DEL SCHEDULER: Apagado.")
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "app" / "static")), name="static")
@@ -99,9 +109,10 @@ async def update_settings(
     db_type: str = Form(...),
     default_report_type: str = Form(...),
     report_format: str = Form(...),
+    safety_stock_margin: float = Form(...),
     default_days: int = Form(...),
-    sheet_name: str = Form(...),
-    included_columns: List[str] = Form(...)
+    sheet_name: str = Form(None),
+    included_columns: List[str] = Form(default=[])
 ):
     """Guarda los cambios en el JSON y reinicia la Suite"""
     new_config = {
@@ -112,10 +123,13 @@ async def update_settings(
         "db_type": db_type,
         "default_report_type": default_report_type,
         "report_format": report_format,
-        "ai_settings": settings.ai_settings, # Mantenemos los de IA por ahora
+        "ai_settings": {
+            "forecast_days": 30,
+            "safety_stock_margin": safety_stock_margin
+        },
         "report_settings": {
             "default_days": default_days,
-            "sheet_name": sheet_name,
+            "sheet_name": sheet_name or "Reporte",
             "included_columns": included_columns
         }
     }
@@ -126,7 +140,7 @@ async def update_settings(
     # Alerta visual de éxito
     return HTMLResponse(content="""
         <script>
-            alert('✅ Configuración guardada. Reiniciando Ecosistema...');
+            alert('✅ Configuración guardada. Reiniciando servicios...');
             window.location.href = '/settings';
         </script>
     """)

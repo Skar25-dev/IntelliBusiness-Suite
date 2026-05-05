@@ -50,18 +50,20 @@ async def scheduled_report_job():
 
 def start_scheduler():
     scheduler = AsyncIOScheduler()
-    hour, minute = settings.report_schedule.split(":")
+    
+    time_str = settings.report_schedule.strip() 
+    hour, minute = time_str.split(":")
 
     scheduler.add_job(
         scheduled_report_job,
         'cron',
-        hour=hour,
-        minute=minute,
+        hour=int(hour),
+        minute=int(minute),
         id="daily_report_job"
     )
 
     scheduler.start()
-    logger.info(f"Scheduler iniciado: Reporte programado todos los días a las {settings.report_schedule}")
+    logger.info(f"🚀 Robot configurado para las {hour}:{minute} todos los días.")
     return scheduler
 
 def reload_scheduler(new_hour: str):
