@@ -8,7 +8,7 @@
     "report_format": "pdf",
     "ai_settings": {
         "forecast_days": 30,
-        "safety_stock_margin": 0.35
+        "safety_stock_margin": 0.2
     },
     "report_settings": {
         "default_days": 25,

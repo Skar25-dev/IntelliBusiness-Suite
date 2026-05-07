@@ -170,46 +170,50 @@ async def download_report(filename: str):
 @app.get("/api/chart-data/{product_id}")
 async def get_chart_data(product_id: int, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
-    if not product: 
+    if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
 
     sales = db.query(Sale).filter(Sale.product_id == product_id)\
                 .order_by(Sale.date.desc()).limit(15).all()
     
     if len(sales) < 7:
-        raise HTTPException(status_code=400, detail="Se necesitan al menos 7 días de datos")
+        raise HTTPException(status_code=400, detail="Datos insuficientes (se necesitan al menos 7 días)")
     
     history = [{"date": s.date.strftime("%d %b"), "value": s.quantity} for s in reversed(sales)]
 
     forecast_series = predict_sales_range(db, product.name, days_to_forecast=30)
 
+    safety_margin = settings.ai_settings.get("safety_stock_margin", 0.20)
+    multiplier = 1 + safety_margin
+
     tomorrow_demand = forecast_series[0]['value']
     month_demand = sum([f['value'] for f in forecast_series])
+    current_stock = product.current_stock
 
     def get_status(current, demand):
         if current < demand * 0.5: return "CRÍTICO", "critical"
         if current < demand: return "BAJO", "low"
         return "ÓPTIMO", "optimal"
     
-    day_status, day_color = get_status(product.current_stock, tomorrow_demand)
-    month_status, month_color = get_status(product.current_stock, month_demand)
+    day_status, day_color = get_status(current_stock, tomorrow_demand)
+    month_status, month_color = get_status(current_stock, month_demand)
 
     return {
         "history": history,
         "forecast": forecast_series,
         "product_name": product.name,
         "inventory": {
-            "current": product.current_stock,
+            "current": current_stock,
             "day": {
                 "status": day_status,
                 "color": day_color,
-                "recommendation": max(0, int(tomorrow_demand * 1.2 - product.current_stock)),
+                "recommendation": max(0, int(tomorrow_demand * multiplier - current_stock)),
                 "demand": round(tomorrow_demand, 1)
             },
             "month": {
                 "status": month_status,
                 "color": month_color,
-                "recommendation": max(0, int(month_demand * 1.2 - product.current_stock)),
+                "recommendation": max(0, int(month_demand * multiplier - current_stock)),
                 "demand": round(month_demand)
             }
         }
