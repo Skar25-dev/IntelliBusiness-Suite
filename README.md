@@ -37,7 +37,7 @@ Visualización unificada de la tendencia histórica y proyecciones dinámicas de
 
 ### 🤖 Inteligencia de Inventario
 Semáforo de estado y asistente de compra prescriptivo basado en la predicción mensual.
-![Inventory](docs/screenshots/inventory_logic.png)
+![Inventario](docs/screenshots/inventory_logic.png)
 
 ### 📧 Automatización Híbrida (Email)
 Recepción de informes con alertas inteligentes inyectadas directamente en el cuerpo del mensaje.
