@@ -9,17 +9,20 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.database import SessionLocal, engine
+from app.database import SessionLocal, engine, Base
 from app.config import settings
 from app.models import Product, Sale
 from app.services.scheduler_service import start_scheduler
 from app.services.report_service import ReportService, REPORT_MODELS, get_columns_for_model
 from app.services.email_service import EmailService
 from app.services.ai_service import AIService
-from app.ai.predictor import predict_sales_range
+from app.ai.predictor import predict_sales_range, ModelNotTrainedError
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Crea las tablas si no existen (no borra datos). Necesario en un entorno
+    # nuevo, p. ej. un contenedor con PostgreSQL vacío.
+    Base.metadata.create_all(bind=engine)
     scheduler = start_scheduler()
     print("⏰ MOTOR DEL SCHEDULER: Encendido y esperando...")
     yield
@@ -47,6 +50,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
 @app.get("/reports", response_class=HTMLResponse)
 async def reports_page(request: Request, db: Session = Depends(get_db)):
     REPORTS_DIR = BASE_DIR / "reports"
+    report_files = []
     
     if REPORTS_DIR.exists():
         files = [f for f in os.listdir(REPORTS_DIR) if f.endswith(('.xlsx', '.pdf'))]
@@ -181,7 +185,13 @@ async def get_chart_data(product_id: int, db: Session = Depends(get_db)):
     
     history = [{"date": s.date.strftime("%d %b"), "value": s.quantity} for s in reversed(sales)]
 
-    forecast_series = predict_sales_range(db, product.name, days_to_forecast=30)
+    try:
+        forecast_series = predict_sales_range(db, product.name, days_to_forecast=30)
+    except ModelNotTrainedError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    if not forecast_series:
+        raise HTTPException(status_code=400, detail="No se pudo generar la predicción para este producto")
 
     safety_margin = settings.ai_settings.get("safety_stock_margin", 0.20)
     multiplier = 1 + safety_margin

@@ -6,11 +6,13 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, root_mean_squared_error
-from sqlalchemy import create_engine
-from app.database import DB_PATH
+from app.database import engine as default_engine
 
-def prepare_data_for_training():
-    engine = create_engine(f"sqlite:///{DB_PATH}")
+MODEL_DIR = Path(__file__).resolve().parent / "model_store"
+
+def prepare_data_for_training(bind=None):
+    # Usa el mismo motor que la app (SQLite o PostgreSQL según la configuración)
+    engine = bind if bind is not None else default_engine
 
     query = "SELECT date, quantity, product_name FROM sales"
     df = pd.read_sql(query, engine)
@@ -33,9 +35,9 @@ def prepare_data_for_training():
     df = df.dropna()
     return df
 
-def train_model():
+def train_model(bind=None, model_dir=None):
     print("🧠 Preparando datos para el entrenamiento...")
-    df = prepare_data_for_training()
+    df = prepare_data_for_training(bind)
 
     if df is None:
         return
@@ -54,12 +56,13 @@ def train_model():
     mae = mean_absolute_error(y_test, preds)
     print(f"✅ Entrenamiento completado. Error Medio (MAE): {mae:.2f} unidades.")
 
-    model_dir = Path(__file__).resolve().parent / "model_store"
-    model_dir.mkdir(exist_ok=True)
+    model_dir = Path(model_dir) if model_dir is not None else MODEL_DIR
+    model_dir.mkdir(parents=True, exist_ok=True)
 
     model_path = model_dir / "stock_model.pkl"
     joblib.dump(model, model_path)
     print(f"💾 Modelo guardado en: {model_path}")
+    return mae
 
 if __name__ == "__main__":
     train_model()
