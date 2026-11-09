@@ -1,21 +1,15 @@
-import joblib
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.models import Product, Sale
 from app.config import settings
-from pathlib import Path
+from app.ai.predictor import get_model
 
 class AIService:
     def __init__(self):
-        BASE_DIR = Path(__file__).resolve().parent.parent.parent
-        MODEL_PATH = BASE_DIR / "app" / "ai" / "model_store" / "stock_model.pkl"
-
-        if MODEL_PATH.exists():
-            self.model = joblib.load(MODEL_PATH)
-        else:
-            self.model = None
+        self.model = get_model()
+        if self.model is None:
             print("⚠️ Advertencia: No se encontró el modelo de IA. El entrenamiento es necesario.")
         
     def predict_next_month_demand(self, db: Session, product_id: int) -> dict:

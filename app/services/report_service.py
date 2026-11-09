@@ -35,7 +35,12 @@ class ReportService:
         query = self.db.query(model)
         
         if category and category != "Todas":
-            query = query.filter(model.category == category)
+            if hasattr(model, "category"):
+                query = query.filter(model.category == category)
+            else:
+                # Sale no tiene categoría propia: se filtra por la de su producto
+                query = query.join(Product, model.product_id == Product.id)\
+                             .filter(Product.category == category)
         
         if days:
             date_limit = datetime.now() - timedelta(days=days)

@@ -76,12 +76,19 @@ Recepción de informes con alertas inteligentes inyectadas directamente en el cu
 │   ├── models.py           # Esquema relacional unificado
 │   └── config.py           # Validador de configuración (Pydantic)
 ├── config/                 # Ajustes persistentes del usuario
-├── data/                   # Base de datos y datasets históricos
+├── data/                   # Base de datos SQLite local (se crea sola, no se versiona)
 ├── reports/                # Historial cronológico de archivos generados
+├── tests/                  # 🧪 Suite de tests automatizados (pytest)
+├── scripts/manual_checks/  # Scripts de comprobación manual (envían email, usan la BD real...)
 ├── docs/                   # Documentación visual
-├── seed_suite.py           # Generador de ecosistema de datos inteligente
+├── .github/workflows/      # CI: tests + build de la imagen Docker
+├── Dockerfile              # Imagen de la aplicación
+├── docker-compose.yml      # App + PostgreSQL
+├── .env.example            # Plantilla de secretos
+├── seed_suite.py           # Generador de datos de demo (¡borra los datos existentes!)
 ├── run.sh                  # Script de arranque rápido profesional
-├── requirements.txt        # Dependencias exactas del sistema
+├── requirements.txt        # Dependencias de producción
+├── requirements-dev.txt    # Dependencias de desarrollo (pytest, httpx)
 └── README.md               # Documentación maestra
 ```
 
@@ -111,7 +118,7 @@ Inicialización e IA:
 ```code
 Bash
 python seed_suite.py   # Generar datos históricos inteligentes
-python app/ai/trainer.py # Entrenar al cerebro de la Suite
+python -m app.ai.trainer   # Entrenar al cerebro de la Suite
 ```
 
 Ejecutar Suite:
@@ -119,6 +126,27 @@ Ejecutar Suite:
 Bash
 ./run.sh
 ```
+
+### 🐳 Con Docker (app + PostgreSQL)
+```bash
+cp .env.example .env          # rellena POSTGRES_PASSWORD (y los datos SMTP para enviar emails)
+docker compose up --build
+
+# Primera vez: datos de demo + entrenar el modelo de IA (el seed BORRA los datos existentes)
+docker compose exec app python seed_suite.py
+docker compose exec app python -m app.ai.trainer
+```
+La app queda en `http://localhost:8000`. Las tablas se crean al arrancar. Dentro de Docker,
+`DB_TYPE=postgresql` y `POSTGRES_HOST=db` tienen prioridad sobre `config/settings.json`.
+Hasta que entrenes el modelo, la página de predicciones responde con un aviso (HTTP 503) en lugar de romper la app.
+
+### 🧪 Tests
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+Los tests usan SQLite en memoria y entrenan un modelo pequeño en una carpeta temporal, así que no tocan
+tus datos, tu modelo real ni envían correos. GitHub Actions los ejecuta en cada push y pull request.
 
 ## 📓 Notas de Desarrollo
 Esta Suite representa la culminación de un proceso de ingeniería de 15 días, integrando principios de Arquitectura Limpia, Análisis Prescriptivo y UX Centrada en el Negocio. Diseñada para ser escalable, segura y, sobre todo, útil para la toma de decisiones estratégicas.

@@ -1,0 +1,16 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.env
+.pytest_cache/
+.idea/
+.vscode/
+data/
+reports/
+docs/
+tests/
+scripts/
+app/ai/model_store/*.pkl
